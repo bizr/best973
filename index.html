@@ -56,293 +56,457 @@
             background: rgba(0, 0, 0, 0.4);
         }
 
-        /* Header */
-        header {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: #ffffff;
-            font-size: 2.5em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            margin-bottom: 10px;
-        }
-
-        /* Song info display - Industrial */
-        #song-info {
-            position: relative;
-            z-index: 10;
-            width: 520px;
-            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 3px solid #444;
-            border-left: 6px solid #ea128f;
-            border-radius: 0;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.1),
-                inset 0 -1px 0 rgba(0,0,0,0.5),
-                0 10px 30px rgba(0, 0, 0, 0.8),
-                0 0 0 1px rgba(234, 18, 143, 0.3);
-            overflow: hidden;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        #song-info::before {
-            content: '';
-            position: absolute;
+        /* Top Navigation Bar - Desktop/Tablet Only */
+        .top-nav {
+            display: none;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(255, 255, 255, 0.02) 2px,
-                rgba(255, 255, 255, 0.02) 4px
-            );
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(234, 18, 143, 0.3);
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: auto;
+            opacity: 0.9;
+            transition: 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            opacity: 1;
+        }
+
+        /* Show nav on tablet and desktop */
+        @media (min-width: 601px) {
+            .top-nav {
+                display: block;
+            }
+
+            body {
+                padding-top: 70px;
+            }
+        }
+
+        /* Player Container */
+        #cdj-player {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        /* 3D Now Playing Display */
+        .now-playing {
+            position: relative;
+            perspective: 1000px;
+            width: 95%;
+            max-width: 1400px;
+        }
+
+        .now-playing-inner {
+            position: relative;
+            background:
+                linear-gradient(135deg,
+                    rgba(234, 18, 143, 0.15) 0%,
+                    rgba(109, 179, 242, 0.15) 50%,
+                    rgba(147, 51, 234, 0.15) 100%
+                );
+            padding: 35px 50px;
+            border-radius: 20px;
+            transform-style: preserve-3d;
+            transform: rotateX(5deg);
+            box-shadow:
+                0 25px 60px rgba(234, 18, 143, 0.4),
+                0 15px 35px rgba(109, 179, 242, 0.3),
+                inset 0 2px 15px rgba(255, 255, 255, 0.1),
+                inset 0 -2px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid;
+            border-image: linear-gradient(135deg,
+                rgba(234, 18, 143, 0.5),
+                rgba(109, 179, 242, 0.5),
+                rgba(147, 51, 234, 0.5)
+            ) 1;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Animated gradient overlay */
+        .now-playing-inner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background:
+                linear-gradient(45deg,
+                    transparent 30%,
+                    rgba(234, 18, 143, 0.2) 50%,
+                    transparent 70%
+                );
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
             pointer-events: none;
             z-index: 1;
         }
 
-        #song-info::after {
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* 3D depth layers */
+        .now-playing-inner::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                #ea128f 50%,
-                transparent 100%);
-            animation: scanline 5s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(0); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(120px); opacity: 0; }
-        }
-
-        .info-header {
-            position: relative;
-            margin-bottom: 15px;
-            z-index: 2;
+            inset: -3px;
+            background: linear-gradient(135deg,
+                rgba(234, 18, 143, 0.3),
+                rgba(109, 179, 242, 0.3),
+                rgba(147, 51, 234, 0.3)
+            );
+            border-radius: 22px;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.6;
         }
 
         .now-playing-label {
             position: relative;
-            color: #999;
-            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
             font-weight: bold;
-            text-transform: uppercase;
             letter-spacing: 3px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #333;
+            text-transform: uppercase;
+            margin-bottom: 15px;
             z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
-        .live-indicator {
-            width: 6px;
-            height: 6px;
-            background: #ea128f;
-            border-radius: 0;
-            box-shadow: 0 0 10px #ea128f, inset 0 0 2px #fff;
-            animation: blinkIndicator 1s steps(2) infinite;
-        }
-
-        @keyframes blinkIndicator {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0.3; }
-        }
-
-        .player-row {
+        .track-name-wrapper {
             position: relative;
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            width: 100%;
+            overflow: hidden;
             z-index: 2;
-        }
-
-        .track-info {
-            flex: 1;
-            min-width: 0;
         }
 
         #track-name {
             position: relative;
             color: #ffffff;
-            font-size: 15px;
-            font-family: 'Courier New', Courier, monospace;
+            font-size: 28px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 15px rgba(234, 18, 143, 0.3);
+            text-align: center;
+            letter-spacing: 0.3px;
             line-height: 1.4;
-            z-index: 2;
+            text-shadow:
+                0 0 30px rgba(234, 18, 143, 0.8),
+                0 0 60px rgba(109, 179, 242, 0.6),
+                0 4px 15px rgba(0, 0, 0, 0.8),
+                0 8px 25px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            display: inline-block;
+            animation: textGlow 2s ease-in-out infinite;
         }
 
+        .track-name-wrapper.marquee {
+            display: flex;
+            justify-content: flex-start;
+        }
 
-        /* Album Art - Compact */
-        #album-art {
+        #track-name.marquee {
+            animation: textGlow 2s ease-in-out infinite, marqueeBounce 10s ease-in-out 2s infinite alternate;
+            text-align: left;
+            will-change: transform;
+        }
+
+        @keyframes marqueeBounce {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(calc(var(--wrapper-width) - 100%));
+            }
+        }
+
+        @keyframes textGlow {
+            0%, 100% {
+                text-shadow:
+                    0 0 30px rgba(234, 18, 143, 0.8),
+                    0 0 60px rgba(109, 179, 242, 0.6),
+                    0 4px 15px rgba(0, 0, 0, 0.8),
+                    0 8px 25px rgba(0, 0, 0, 0.5);
+            }
+            50% {
+                text-shadow:
+                    0 0 40px rgba(234, 18, 143, 1),
+                    0 0 80px rgba(109, 179, 242, 0.8),
+                    0 4px 15px rgba(0, 0, 0, 0.8),
+                    0 8px 25px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Floating disc section */
+        .disc-section {
             position: relative;
-            width: 70px;
-            height: 70px;
-            flex-shrink: 0;
-            transition: 0.3s ease all;
-            box-shadow: 0 0 0 3px #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jog-platter {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            background:
+                radial-gradient(circle at 30% 30%,
+                    rgba(234, 18, 143, 0.1),
+                    rgba(109, 179, 242, 0.1),
+                    #0a0a0a
+                );
             border-radius: 50%;
             overflow: hidden;
-            background: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow:
+                0 0 0 8px rgba(234, 18, 143, 0.2),
+                0 0 0 12px rgba(109, 179, 242, 0.15),
+                0 20px 60px rgba(234, 18, 143, 0.4),
+                0 10px 40px rgba(109, 179, 242, 0.3),
+                inset 0 3px 20px rgba(0,0,0,0.9);
         }
 
-        #album-art.active {
-            box-shadow: 0 0 0 3px #555, 0 0 15px rgba(234, 18, 143, 0.3);
+        .jog-platter:hover {
+            box-shadow:
+                0 0 0 8px rgba(234, 18, 143, 0.4),
+                0 0 0 12px rgba(109, 179, 242, 0.3),
+                0 0 50px rgba(234, 18, 143, 0.6),
+                0 0 80px rgba(109, 179, 242, 0.5),
+                0 25px 70px rgba(234, 18, 143, 0.5),
+                0 15px 50px rgba(109, 179, 242, 0.4),
+                inset 0 3px 20px rgba(0,0,0,0.9);
+            transform: scale(1.05);
         }
 
-        #album-art:before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 0;
-            left: 0;
-            width: 12px;
-            height: 12px;
-            margin: -6px auto 0 auto;
-            background-color: #333;
-            border-radius: 50%;
-            box-shadow: inset 0 0 0 2px #555;
-            z-index: 2;
+        .jog-platter.active {
+            box-shadow:
+                0 0 0 8px rgba(234, 18, 143, 0.6),
+                0 0 0 12px rgba(109, 179, 242, 0.5),
+                0 0 60px rgba(234, 18, 143, 0.8),
+                0 0 100px rgba(109, 179, 242, 0.7),
+                0 30px 80px rgba(234, 18, 143, 0.6),
+                0 20px 60px rgba(109, 179, 242, 0.5),
+                inset 0 3px 20px rgba(0,0,0,0.9);
         }
 
-        #album-art img {
-            display: block;
+        .jog-platter img {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.9;
+            opacity: 0.7;
             z-index: 1;
         }
 
-        #album-art.active img {
-            animation: rotateAlbumArt 3s linear 0s infinite forwards;
+        .jog-platter.active img {
+            animation: rotateJog 3s linear infinite;
         }
 
-        @keyframes rotateAlbumArt {
-            0% { transform: rotateZ(0); }
-            100% { transform: rotateZ(360deg); }
+        @keyframes rotateJog {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        #buffer-box {
+        .jog-center {
             position: absolute;
             top: 50%;
-            right: 0;
-            left: 0;
-            font-size: 8px;
-            font-family: 'Courier New', Courier, monospace;
-            text-align: center;
-            font-weight: bold;
-            line-height: 1;
-            padding: 4px;
-            margin: -8px auto 0 auto;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #ea128f;
-            opacity: 0;
-            z-index: 2;
-            transition: 0.1s linear all;
-        }
-
-        #album-art.buffering img {
-            opacity: 0.5;
-            filter: blur(1px);
-        }
-
-        #album-art.buffering #buffer-box {
-            opacity: 1;
-        }
-
-        /* Player Controls - Industrial White/Grey */
-        #player-controls {
-            position: relative;
-            flex-shrink: 0;
-            z-index: 2;
-        }
-
-        .button {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-            border: 2px solid #555;
-            border-radius: 0;
-            cursor: pointer;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85px;
+            height: 85px;
+            background:
+                radial-gradient(circle at 35% 35%, #3a3a3a 0%, #2a2a2a 40%, #1a1a1a 80%);
+            border-radius: 50%;
+            border: 4px solid #222;
+            box-shadow:
+                inset 0 3px 8px rgba(0,0,0,0.8),
+                inset 0 -2px 4px rgba(255,255,255,0.05),
+                0 4px 10px rgba(0,0,0,0.7);
+            z-index: 3;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.15s ease all;
+        }
+
+        .jog-center::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.02) 2px,
+                rgba(255, 255, 255, 0.02) 4px
+            );
+        }
+
+        .center-icon {
+            position: relative;
+            color: #ea128f;
+            font-size: 42px;
+            text-shadow:
+                0 0 30px rgba(234, 18, 143, 1),
+                0 0 60px rgba(234, 18, 143, 0.6),
+                0 4px 10px rgba(0,0,0,0.9);
+            z-index: 1;
+            transition: 0.3s ease;
+        }
+
+        .jog-platter:hover .center-icon {
+            color: #ff1a9f;
+            text-shadow:
+                0 0 40px rgba(234, 18, 143, 1),
+                0 0 80px rgba(234, 18, 143, 0.8),
+                0 4px 10px rgba(0,0,0,0.9);
+            transform: scale(1.15);
+        }
+
+        .jog-platter.active .center-icon {
+            color: #00ff88;
+            text-shadow:
+                0 0 40px rgba(0, 255, 136, 1),
+                0 0 80px rgba(0, 255, 136, 0.6),
+                0 4px 10px rgba(0,0,0,0.9);
+            animation: iconPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .jog-platter.active .center-icon .fa {
+            display: none;
+        }
+
+        .jog-platter.active .center-icon::before {
+            content: '❚❚';
+            font-family: Arial, sans-serif;
+            font-size: 36px;
+            display: block;
+        }
+
+
+        /* Track History Section */
+        .track-history {
+            position: relative;
+            z-index: 10;
+            width: 600px;
+            max-width: 90%;
+            margin: 0 auto 40px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 2px solid #333;
+            border-left: 4px solid #ea128f;
+            padding: 20px;
             box-shadow:
-                inset 1px 1px 2px rgba(255,255,255,0.1),
-                inset -1px -1px 2px rgba(0,0,0,0.5),
-                0 3px 8px rgba(0,0,0,0.5);
+                inset 0 1px 0 rgba(255,255,255,0.05),
+                inset 0 -1px 0 rgba(0,0,0,0.5),
+                0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #333, transparent);
+        }
+
+        .header-text {
+            color: #666;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 12px;
+            background: linear-gradient(90deg, rgba(234, 18, 143, 0.05) 0%, rgba(0,0,0,0.3) 100%);
+            border-left: 2px solid #333;
+            transition: 0.2s ease;
             position: relative;
         }
 
-        .button::before {
+        .history-item::before {
             content: '';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border: 1px solid transparent;
-            transition: 0.15s ease all;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ea128f;
+            transform: scaleY(0);
+            transition: 0.2s ease;
         }
 
-        .button i {
-            color: #e0e0e0;
-            font-size: 22px;
-            transition: 0.15s ease all;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        .history-item:hover {
+            background: linear-gradient(90deg, rgba(234, 18, 143, 0.1) 0%, rgba(0,0,0,0.4) 100%);
         }
 
-        .button:hover {
-            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
-            border-color: #666;
-            box-shadow:
-                inset 1px 1px 2px rgba(255,255,255,0.15),
-                inset -1px -1px 2px rgba(0,0,0,0.5),
-                0 4px 12px rgba(0,0,0,0.6);
+        .history-item:hover::before {
+            transform: scaleY(1);
         }
 
-        .button:hover::before {
-            border-color: rgba(234, 18, 143, 0.3);
+        .history-time {
+            color: #ea128f;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            min-width: 45px;
+            text-shadow: 0 0 5px rgba(234, 18, 143, 0.3);
         }
 
-        .button:hover i {
-            color: #fff;
+        .history-track {
+            flex: 1;
+            color: #999;
+            font-size: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .button:active {
-            background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
-            box-shadow:
-                inset 2px 2px 4px rgba(0,0,0,0.5),
-                inset -1px -1px 2px rgba(255,255,255,0.05);
+        .history-item:first-child .history-track {
+            color: #bbb;
         }
 
         /* Footer */
@@ -371,91 +535,141 @@
 
         /* Mobile responsive */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
+            .now-playing {
+                width: 98%;
+                max-width: none;
             }
 
-            .logo {
-                width: 150px;
+            .now-playing-inner {
+                padding: 30px 40px;
             }
 
-            #song-info {
-                width: 460px;
+            #track-name {
+                font-size: 26px;
+            }
+
+            .jog-platter {
+                width: 280px;
+                height: 280px;
+            }
+
+            .jog-center {
+                width: 75px;
+                height: 75px;
+            }
+
+            .center-icon {
+                font-size: 38px;
             }
         }
 
-        @media (max-width: 580px) {
-            #song-info {
-                width: 90%;
-                max-width: 440px;
+        @media (max-width: 600px) {
+            .top-nav {
+                display: none;
             }
 
-            .player-row {
-                gap: 12px;
+            body {
+                padding-top: 0;
             }
 
-            #album-art {
-                width: 60px;
-                height: 60px;
+            .now-playing {
+                width: 100%;
+                max-width: none;
             }
 
-            .button {
-                width: 50px;
-                height: 50px;
+            .now-playing-inner {
+                padding: 25px 25px;
+                border-radius: 0;
             }
 
-            .button i {
-                font-size: 18px;
+            #track-name {
+                font-size: 24px;
+            }
+
+            .jog-platter {
+                width: 260px;
+                height: 260px;
+            }
+
+            .jog-center {
+                width: 70px;
+                height: 70px;
+            }
+
+            .center-icon {
+                font-size: 34px;
+            }
+
+            .jog-platter.active .center-icon::before {
+                font-size: 32px;
             }
         }
 
         @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
+            #cdj-player {
+                gap: 40px;
+                margin-bottom: 40px;
             }
 
-            .logo {
-                width: 120px;
+            .now-playing {
+                width: 100%;
             }
 
-            #song-info {
-                width: 90%;
-                max-width: 360px;
-                padding: 15px;
-            }
-
-            #track-name {
-                font-size: 12px;
-                letter-spacing: 0.3px;
+            .now-playing-inner {
+                padding: 20px 15px;
+                border-radius: 0;
             }
 
             .now-playing-label {
+                font-size: 10px;
+                letter-spacing: 2px;
+                margin-bottom: 12px;
+            }
+
+            #track-name {
+                font-size: 22px;
+            }
+
+            .jog-platter {
+                width: 240px;
+                height: 240px;
+            }
+
+            .jog-center {
+                width: 60px;
+                height: 60px;
+            }
+
+            .center-icon {
+                font-size: 30px;
+            }
+
+            .jog-platter.active .center-icon::before {
+                font-size: 28px;
+            }
+
+            .track-history {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .header-text {
                 font-size: 9px;
                 letter-spacing: 2px;
             }
 
-            .player-row {
+            .history-item {
                 gap: 10px;
+                padding: 8px 10px;
             }
 
-            #album-art {
-                width: 50px;
-                height: 50px;
+            .history-time {
+                font-size: 10px;
+                min-width: 40px;
             }
 
-            #album-art:before {
-                width: 10px;
-                height: 10px;
-                margin: -5px auto 0 auto;
-            }
-
-            .button {
-                width: 45px;
-                height: 45px;
-            }
-
-            .button i {
-                font-size: 16px;
+            .history-track {
+                font-size: 11px;
             }
         }
     </style>
@@ -463,35 +677,48 @@
 <body>
     <div id="bg-layer"></div>
 
-    <header>
-        <!-- Logo image -->
-        <img src="best-logo-retina.png" alt="Best 97.3 Logo" class="logo">
-        <h1>Listen Live</h1>
-    </header>
+    <!-- Top Navigation Bar - Desktop/Tablet Only -->
+    <nav class="top-nav">
+        <img src="best-logo-retina.png" alt="Best 97.3 Logo" class="nav-logo">
+    </nav>
 
-    <!-- Song info display with integrated player -->
-    <div id="song-info">
-        <div class="info-header">
-            <div class="now-playing-label">
-                <span class="live-indicator"></span>
-                NOW PLAYING
+    <!-- Radio Player -->
+    <div id="cdj-player">
+        <!-- 3D Now Playing Display -->
+        <div class="now-playing">
+            <div class="now-playing-inner">
+                <div class="now-playing-label">NOW PLAYING</div>
+                <div class="track-name-wrapper">
+                    <div id="track-name">PRESS PLAY TO START STREAMING</div>
+                </div>
             </div>
         </div>
 
-        <div class="player-row">
-            <div id="album-art">
+        <!-- Floating Disc -->
+        <div class="disc-section">
+            <div id="album-art" class="jog-platter">
                 <img src="best-logo-retina.png" alt="Best 97.3" id="_1">
-                <div id="buffer-box">Buffering...</div>
-            </div>
-
-            <div class="track-info">
-                <div id="track-name">Best 97.3 FM - Click play to start streaming</div>
-            </div>
-
-            <div id="player-controls">
-                <div class="button" id="play-pause-button">
-                    <i class="fa fa-play"></i>
+                <div class="jog-center">
+                    <div class="center-icon">
+                        <i class="fa fa-play"></i>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track History Section -->
+    <div class="track-history">
+        <div class="history-header">
+            <div class="header-line"></div>
+            <div class="header-text">TRACK HISTORY</div>
+            <div class="header-line"></div>
+        </div>
+        <div class="history-list" id="history-list">
+            <!-- Will be populated by JavaScript -->
+            <div class="history-item">
+                <div class="history-time">--:--</div>
+                <div class="history-track">LOADING...</div>
             </div>
         </div>
     </div>
@@ -510,16 +737,62 @@
             'use strict';
 
             var audio = null;
-            var albumArt = $('#album-art');
+            var jogPlatter = $('#album-art');
             var trackName = $('#track-name');
-            var playPauseButton = $("#play-pause-button");
-            var buttonIcon = playPauseButton.find('i');
-            var buffInterval = null;
-            var nTime = 0;
-            var bTime;
+            var cdjPlayer = $('#cdj-player');
+            var historyList = $('#history-list');
 
             // Stream URL
             var streamUrl = 'https://stream.best973.gr/stream/1/';
+
+            // Format timestamp to time
+            function formatTime(timestamp) {
+                var date = new Date(timestamp * 1000);
+                var hours = date.getHours().toString().padStart(2, '0');
+                var minutes = date.getMinutes().toString().padStart(2, '0');
+                return hours + ':' + minutes;
+            }
+
+            // Enable marquee if text overflows
+            function checkMarquee() {
+                var wrapper = $('.track-name-wrapper');
+                var wrapperWidth = wrapper.width();
+
+                // Store original text if not already stored
+                if (!trackName.data('original-text')) {
+                    trackName.data('original-text', trackName.text());
+                }
+
+                var originalText = trackName.data('original-text');
+
+                // Create temporary span to measure text width
+                var tempSpan = $('<span>').css({
+                    'visibility': 'hidden',
+                    'position': 'absolute',
+                    'white-space': 'nowrap',
+                    'font-size': trackName.css('font-size'),
+                    'font-weight': trackName.css('font-weight'),
+                    'letter-spacing': trackName.css('letter-spacing'),
+                    'font-family': trackName.css('font-family')
+                }).text(originalText);
+
+                $('body').append(tempSpan);
+                var textWidth = tempSpan.width();
+                tempSpan.remove();
+
+                // If text overflows, enable marquee
+                if (textWidth > wrapperWidth) {
+                    trackName.html(originalText);
+                    // Set CSS variable for wrapper width
+                    trackName.css('--wrapper-width', wrapperWidth + 'px');
+                    trackName.addClass('marquee');
+                    wrapper.addClass('marquee');
+                } else {
+                    trackName.html(originalText);
+                    trackName.removeClass('marquee');
+                    wrapper.removeClass('marquee');
+                }
+            }
 
             // Fetch current song info
             function fetchSongInfo() {
@@ -534,7 +807,7 @@
                             if (data && data.length > 0 && data[0]) {
                                 var currentSong = data[0];
                                 var songText = '';
-                                
+
                                 // Try different possible field names from the JSON
                                 if (currentSong.title) {
                                     songText = currentSong.title;
@@ -545,27 +818,60 @@
                                 } else if (currentSong.metadata) {
                                     songText = currentSong.metadata;
                                 }
-                                
+
                                 // Add artist if available
                                 if (currentSong.artist && songText) {
                                     songText = currentSong.artist + ' - ' + songText;
                                 }
-                                
+
                                 // Update display if we got song info
                                 if (songText && songText.trim() !== '') {
                                     trackName.text(songText);
+                                    trackName.data('original-text', songText);
                                 } else {
                                     // Fallback: display any text we can find
-                                    var fallbackText = currentSong.title || currentSong.song || 
-                                                      currentSong.metadata || 'Best 97.3 FM';
+                                    var fallbackText = currentSong.title || currentSong.song ||
+                                                      currentSong.metadata || 'BEST 97.3 FM';
                                     trackName.text(fallbackText);
+                                    trackName.data('original-text', fallbackText);
                                 }
+
+                                // Check if marquee is needed
+                                setTimeout(checkMarquee, 100);
                             } else {
-                                trackName.text('Best 97.3 FM - Kalamata');
+                                trackName.text('BEST 97.3 FM - KALAMATA');
+                                trackName.data('original-text', 'BEST 97.3 FM - KALAMATA');
+                            }
+
+                            // Update track history (previous 5 songs) - moved outside current song check
+                            if (data && data.length > 1) {
+                                var historyHTML = '';
+                                var historyCount = Math.min(5, data.length - 1);
+
+                                for (var i = 1; i <= historyCount; i++) {
+                                    var track = data[i];
+                                    if (track) {
+                                        var trackTitle = track.title || track.song || track.track || 'Unknown';
+                                        var trackTime = formatTime(track.playedat || 0);
+
+                                        historyHTML += '<div class="history-item">';
+                                        historyHTML += '<div class="history-time">' + trackTime + '</div>';
+                                        historyHTML += '<div class="history-track">' + trackTitle + '</div>';
+                                        historyHTML += '</div>';
+                                    }
+                                }
+
+                                if (historyHTML) {
+                                    historyList.html(historyHTML);
+                                }
+                            } else if (data && data.length === 1) {
+                                // Clear loading placeholder if no history yet
+                                historyList.html('<div class="history-item"><div class="history-time">--:--</div><div class="history-track">No previous tracks yet</div></div>');
                             }
                         } catch (e) {
                             console.error('Error parsing song info:', e);
-                            trackName.text('Best 97.3 FM');
+                            trackName.text('BEST 97.3 FM');
+                            trackName.data('original-text', 'BEST 97.3 FM');
                         }
                     },
                     error: function(xhr, status, error) {
@@ -579,36 +885,21 @@
             function playPause() {
                 setTimeout(function() {
                     if (audio.paused) {
-                        albumArt.addClass('active');
-                        checkBuffering();
-                        buttonIcon.attr('class', 'fa fa-pause');
+                        // Activate everything
+                        jogPlatter.addClass('active');
+                        cdjPlayer.addClass('active');
                         audio.play();
                         // Fetch song info immediately when starting to play
                         fetchSongInfo();
                     } else {
-                        albumArt.removeClass('active');
-                        clearInterval(buffInterval);
-                        albumArt.removeClass('buffering');
-                        buttonIcon.attr('class', 'fa fa-play');
+                        // Deactivate everything
+                        jogPlatter.removeClass('active');
+                        cdjPlayer.removeClass('active');
                         audio.pause();
                     }
-                }, 300);
+                }, 150);
             }
 
-            // Check buffering status
-            function checkBuffering() {
-                clearInterval(buffInterval);
-                buffInterval = setInterval(function() {
-                    if ((nTime == 0) || (bTime - nTime) > 1000) {
-                        albumArt.addClass('buffering');
-                    } else {
-                        albumArt.removeClass('buffering');
-                    }
-                    bTime = new Date().getTime();
-                }, 100);
-            }
-
-            // Update current time
             // Initialize player
             function initPlayer() {
                 audio = new Audio();
@@ -616,19 +907,22 @@
                 audio.preload = 'none';
                 audio.loop = false;
 
-                // Event listeners
-                playPauseButton.on('click', playPause);
+                // Event listeners - click anywhere on the disc
+                jogPlatter.on('click', playPause);
 
                 // Fetch song info every 30 seconds
                 fetchSongInfo();
                 setInterval(fetchSongInfo, 30000);
-
-                bTime = new Date().getTime();
             }
 
             // Initialize on page load
             $(document).ready(function() {
                 initPlayer();
+
+                // Check marquee on window resize
+                $(window).on('resize', function() {
+                    checkMarquee();
+                });
             });
         })();
     </script>
