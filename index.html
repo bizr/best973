@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best 97.3 Kalamata - Listen Live</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+        body {
+            font-family: 'Helvetica', Arial, sans-serif;
+            margin: 0;
+            background-color: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background layer */
+        #bg-layer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: #000;
+            z-index: 1;
+            /* Background image */
+            background-image: url('/best-cov.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Overlay for better readability */
+        #bg-layer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        /* Song info display */
+        #song-info {
+            display:none;
+            position: relative;
+            z-index: 10;
+            width: 320px;
+            background: #000;
+            border: 2px solid #ea128f;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #track-name {
+            color: #00ff00;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        /* Marquee for song title */
+        .marquee {
+            overflow: hidden;
+            position: relative;
+            height: 24px;
+            width: 100%;
+        }
+
+        .marquee > span {
+            white-space: nowrap;
+            position: absolute;
+            animation: marquee 30s linear infinite;
+            line-height: 24px;
+            padding-left: 100%;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Player container */
+        #app-cover {
+            position: relative;
+            width: 320px;
+            height: 100px;
+            z-index: 10;
+        }
+
+        #player {
+            position: relative;
+            height: 100%;
+        }
+
+        #player-content {
+            position: relative;
+            height: 100%;
+            background-color: #fff;
+            border-radius: 15px;
+            z-index: 2;
+        }
+
+        #album-art {
+            position: absolute;
+            top: 50%;
+            left: 40px;
+            transform: translateY(-50%);
+            width: 115px;
+            height: 115px;
+            transition: 0.3s ease all;
+            box-shadow: 0 0 0 10px #fff;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        #album-art.active {
+            box-shadow: 0 0 0 4px #fff7f7, 0 30px 50px -15px #afb7c1;
+        }
+
+        #album-art:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            margin: -10px auto 0 auto;
+            background-color: #d6dee7;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 2px #fff;
+            z-index: 2;
+        }
+
+        #album-art img {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        #album-art.active img {
+            animation: rotateAlbumArt 3s linear 0s infinite forwards;
+        }
+
+        @keyframes rotateAlbumArt {
+            0% { transform: rotateZ(0); }
+            100% { transform: rotateZ(360deg); }
+        }
+
+        #buffer-box {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: 0;
+            height: 13px;
+            color: #1f1f1f;
+            font-size: 13px;
+            font-family: Helvetica;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1;
+            padding: 6px;
+            margin: -12px auto 0 auto;
+            background-color: rgba(255, 255, 255, 0.19);
+            opacity: 0;
+            z-index: 2;
+            transition: 0.1s linear all;
+        }
+
+        #album-art.buffering img {
+            opacity: 0.8;
+            filter: blur(2px);
+        }
+
+        #album-art.buffering #buffer-box {
+            opacity: 1;
+        }
+
+        #player-controls {
+            width: 120px;
+            height: 100%;
+            margin: 0 5px 0 141px;
+            float: right;
+            overflow: hidden;
+        }
+
+        .control {
+            width: 100%;
+            float: left;
+            padding: 12px 0;
+        }
+
+        .button {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto;
+            background-color: #ea128f;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s ease all;
+        }
+
+        .button i {
+            color: #fff;
+            font-size: 26px;
+            transition: 0.2s ease all;
+        }
+
+        .button:hover {
+            background-color: #d00f7f;
+        }
+
+        .button:hover i {
+            color: #000;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            margin-top: 40px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: #fff;
+            font-size: 20px;
+            margin: 0 10px;
+            transition: 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #ea128f;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .logo {
+                width: 150px;
+            }
+
+            #song-info {
+                width: 290px;
+            }
+
+            #app-cover {
+                width: 290px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .logo {
+                width: 120px;
+            }
+
+            #song-info {
+                width: 260px;
+            }
+
+            #app-cover {
+                width: 260px;
+            }
+
+            #album-art {
+                left: 20px;
+            }
+
+            #player-controls {
+                margin-left: 121px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-layer"></div>
+
+    <header>
+        <!-- Logo image -->
+        <img src="/best-logo-retina.png" alt="Best 97.3 Logo" class="logo">
+        <h1>Listen Live</h1>
+    </header>
+
+    <!-- Song info display -->
+    <div id="song-info">
+        <div class="marquee">
+            <span id="track-name">Best 97.3 FM - Click play to start streaming</span>
+        </div>
+    </div>
+
+    <div id="app-cover">
+        <div id="player">
+            <div id="player-content">
+                <div id="album-art">
+                    <!-- Album art -->
+                    <img src="/best-logo-retina.png" alt="Best 97.3" id="_1">
+                    <div id="buffer-box">Buffering...</div>
+                </div>
+                
+                <div id="player-controls">
+                    <div class="control">
+                        <div class="button" id="play-pause-button">
+                            <i class="fa fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/best973" target="_blank" title="Follow us on Facebook">
+                <i class="fa fa-facebook"></i>
+            </a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            var audio = null;
+            var albumArt = $('#album-art');
+            var trackName = $('#track-name');
+            var playPauseButton = $("#play-pause-button");
+            var buttonIcon = playPauseButton.find('i');
+            var buffInterval = null;
+            var nTime = 0;
+            var bTime;
+
+            // Stream URL
+            var streamUrl = 'https://stream.best973.gr/stream/1/';
+
+            // Fetch current song info
+            function fetchSongInfo() {
+                $.ajax({
+                    url: 'https://stream.best973.gr/played?sid=1&type=json',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        try {
+                            // The API returns an array of played songs
+                            // The first item (index 0) is the current/most recent song
+                            if (data && data.length > 0 && data[0]) {
+                                var currentSong = data[0];
+                                var songText = '';
+                                
+                                // Try different possible field names from the JSON
+                                if (currentSong.title) {
+                                    songText = currentSong.title;
+                                } else if (currentSong.song) {
+                                    songText = currentSong.song;
+                                } else if (currentSong.track) {
+                                    songText = currentSong.track;
+                                } else if (currentSong.metadata) {
+                                    songText = currentSong.metadata;
+                                }
+                                
+                                // Add artist if available
+                                if (currentSong.artist && songText) {
+                                    songText = currentSong.artist + ' - ' + songText;
+                                }
+                                
+                                // Update display if we got song info
+                                if (songText && songText.trim() !== '') {
+                                    trackName.text(songText);
+                                } else {
+                                    // Fallback: display any text we can find
+                                    var fallbackText = currentSong.title || currentSong.song || 
+                                                      currentSong.metadata || 'Best 97.3 FM';
+                                    trackName.text(fallbackText);
+                                }
+                            } else {
+                                trackName.text('Best 97.3 FM - Kalamata');
+                            }
+                        } catch (e) {
+                            console.error('Error parsing song info:', e);
+                            trackName.text('Best 97.3 FM');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching song info:', error);
+                        // Don't change the display on error, keep previous song
+                    }
+                });
+            }
+
+            // Play/Pause functionality
+            function playPause() {
+                setTimeout(function() {
+                    if (audio.paused) {
+                        albumArt.addClass('active');
+                        checkBuffering();
+                        buttonIcon.attr('class', 'fa fa-pause');
+                        audio.play();
+                        // Fetch song info immediately when starting to play
+                        fetchSongInfo();
+                    } else {
+                        albumArt.removeClass('active');
+                        clearInterval(buffInterval);
+                        albumArt.removeClass('buffering');
+                        buttonIcon.attr('class', 'fa fa-play');
+                        audio.pause();
+                    }
+                }, 300);
+            }
+
+            // Check buffering status
+            function checkBuffering() {
+                clearInterval(buffInterval);
+                buffInterval = setInterval(function() {
+                    if ((nTime == 0) || (bTime - nTime) > 1000) {
+                        albumArt.addClass('buffering');
+                    } else {
+                        albumArt.removeClass('buffering');
+                    }
+                    bTime = new Date().getTime();
+                }, 100);
+            }
+
+            // Update current time
+            // Initialize player
+            function initPlayer() {
+                audio = new Audio();
+                audio.src = streamUrl;
+                audio.preload = 'none';
+                audio.loop = false;
+
+                // Event listeners
+                playPauseButton.on('click', playPause);
+
+                // Fetch song info every 15 seconds
+                fetchSongInfo();
+                setInterval(fetchSongInfo, 15000);
+
+                bTime = new Date().getTime();
+            }
+
+            // Initialize on page load
+            $(document).ready(function() {
+                initPlayer();
+            });
+        })();
+    </script>
+</body>
+</html>
+
