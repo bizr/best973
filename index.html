@@ -1,15 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Best 97.3 Kalamata - Live Radio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Best 97.3 FM Kalamata - Live Radio</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Ακούστε ζωντανά το Best 97.3 FM Καλαμάτα. Η καλύτερη μουσική 24 ώρες το 24ωρο. Listen live to Best 97.3 FM Kalamata radio station.">
+    <meta name="keywords" content="Best 97.3, radio, Kalamata, Καλαμάτα, ραδιόφωνο, live, ζωντανά, FM, music, μουσική, Greece, Ελλάδα">
+    <meta name="author" content="Best 97.3 FM">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Greek">
+    <link rel="canonical" href="https://best973.gr/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://best973.gr/">
+    <meta property="og:title" content="Best 97.3 FM Kalamata - Live Radio">
+    <meta property="og:description" content="Ακούστε ζωντανά το Best 97.3 FM Καλαμάτα. Η καλύτερη μουσική 24 ώρες το 24ωρο.">
+    <meta property="og:image" content="https://best973.gr/best-cov.jpg">
+    <meta property="og:locale" content="el_GR">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://best973.gr/">
+    <meta name="twitter:title" content="Best 97.3 FM Kalamata - Live Radio">
+    <meta name="twitter:description" content="Ακούστε ζωντανά το Best 97.3 FM Καλαμάτα. Η καλύτερη μουσική 24 ώρες το 24ωρο.">
+    <meta name="twitter:image" content="https://best973.gr/best-cov.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="best-logo-retina.png">
+    <link rel="apple-touch-icon" href="best-logo-retina.png">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ea128f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Best 97.3">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://stream.best973.gr">
+    <link rel="dns-prefetch" href="https://stream.best973.gr">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a12 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 30px;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(234, 18, 143, 0.2);
+            border-top-color: #ea128f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
 
         *:focus {
@@ -708,6 +801,13 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <img src="best-logo-retina.png" alt="Best 97.3" class="loading-logo">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
     <div id="bg-layer"></div>
 
     <!-- Top Navigation Bar - Desktop/Tablet Only -->
@@ -955,8 +1055,26 @@
                 $(window).on('resize', function() {
                     checkMarquee();
                 });
+
+                // Hide loading screen
+                setTimeout(function() {
+                    $('#loading-screen').addClass('hidden');
+                }, 800);
             });
         })();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
