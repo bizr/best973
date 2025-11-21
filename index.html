@@ -105,6 +105,47 @@
             text-transform: uppercase;
         }
 
+        /* Landscape blocker */
+        .landscape-blocker {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .landscape-blocker i {
+            font-size: 48px;
+            color: #ea128f;
+            margin-bottom: 20px;
+            animation: rotatePhone 2s ease-in-out infinite;
+        }
+
+        @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+        }
+
+        .landscape-blocker p {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 900px) and (orientation: landscape) {
+            .landscape-blocker {
+                display: flex;
+            }
+        }
+
         *:focus {
             outline: none;
         }
@@ -837,6 +878,12 @@
     </style>
 </head>
 <body>
+    <!-- Landscape Blocker -->
+    <div class="landscape-blocker">
+        <i class="fa fa-mobile"></i>
+        <p>Please rotate your device to portrait mode</p>
+    </div>
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <img src="best-logo-retina.png" alt="Best 97.3" class="loading-logo">
@@ -1013,6 +1060,9 @@
                                 trackName.text(displayText);
                                 trackName.data('original-text', displayText);
 
+                                // Save track for lyrics redirect
+                                localStorage.setItem('best973_track', displayText);
+
                                 // Update Media Session for lock screen / control center
                                 if ('mediaSession' in navigator) {
                                     navigator.mediaSession.metadata = new MediaMetadata({
@@ -1088,10 +1138,13 @@
                         if ('mediaSession' in navigator) {
                             navigator.mediaSession.playbackState = 'playing';
                         }
+                        // Save playing state
+                        localStorage.setItem('best973_playing', 'true');
                     }).catch(function(e) {
                         console.log('Play failed:', e);
                         jogPlatter.removeClass('active');
                         cdjPlayer.removeClass('active');
+                        localStorage.setItem('best973_playing', 'false');
                     });
                 }
                 fetchSongInfo();
@@ -1106,6 +1159,8 @@
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.playbackState = 'paused';
                 }
+                // Save playing state
+                localStorage.setItem('best973_playing', 'false');
             }
 
             // Play/Pause functionality
@@ -1177,6 +1232,17 @@
 
             // Initialize on page load
             $(document).ready(function() {
+                // Check if this is a duplicate open while music is playing
+                var isPlaying = localStorage.getItem('best973_playing') === 'true';
+                var currentTrack = localStorage.getItem('best973_track');
+
+                if (isPlaying && currentTrack && currentTrack !== 'Best 97.3') {
+                    // Opened from lock screen while playing - redirect to lyrics search
+                    var searchQuery = encodeURIComponent(currentTrack + ' lyrics');
+                    window.location.href = 'https://www.google.com/search?q=' + searchQuery;
+                    return;
+                }
+
                 initPlayer();
 
                 // Check marquee on window resize

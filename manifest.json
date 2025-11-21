@@ -1,12 +1,14 @@
 {
+  "id": "best973-radio",
   "name": "Best 97.3 FM Kalamata",
   "short_name": "Best 97.3",
   "description": "Listen live to Best 97.3 FM Kalamata radio station",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ea128f",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "best-logo-retina.png",
