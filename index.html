@@ -956,6 +956,7 @@
             var trackName = $('#track-name');
             var cdjPlayer = $('#cdj-player');
             var historyList = $('#history-list');
+            var heartbeatInterval = null;
 
             // Stream URL
             var streamUrl = 'https://stream.best973.gr/stream/1/';
@@ -1138,8 +1139,13 @@
                         if ('mediaSession' in navigator) {
                             navigator.mediaSession.playbackState = 'playing';
                         }
-                        // Save playing state
-                        localStorage.setItem('best973_playing', 'true');
+                        // Save playing state with timestamp
+                        localStorage.setItem('best973_playing', Date.now().toString());
+                        // Start heartbeat
+                        if (heartbeatInterval) clearInterval(heartbeatInterval);
+                        heartbeatInterval = setInterval(function() {
+                            localStorage.setItem('best973_playing', Date.now().toString());
+                        }, 5000);
                     }).catch(function(e) {
                         console.log('Play failed:', e);
                         jogPlatter.removeClass('active');
@@ -1159,8 +1165,9 @@
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.playbackState = 'paused';
                 }
-                // Save playing state
-                localStorage.setItem('best973_playing', 'false');
+                // Stop heartbeat and clear playing state
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
+                localStorage.setItem('best973_playing', '0');
             }
 
             // Play/Pause functionality
@@ -1234,20 +1241,19 @@
             $(document).ready(function() {
                 initPlayer();
 
-                // Check if music is playing (from another instance)
-                var isPlaying = localStorage.getItem('best973_playing') === 'true';
+                // Check if music was recently playing (within last 5 minutes - accounts for iOS suspending JS)
+                var lastPlaying = parseInt(localStorage.getItem('best973_playing') || '0');
                 var currentTrack = localStorage.getItem('best973_track');
+                var wasRecentlyPlaying = (Date.now() - lastPlaying) < 300000;
 
-                if (isPlaying) {
+                if (wasRecentlyPlaying && currentTrack) {
                     // Sync UI to show music is playing
                     jogPlatter.addClass('active');
                     cdjPlayer.addClass('active');
 
-                    if (currentTrack) {
-                        trackName.text(currentTrack);
-                        trackName.data('original-text', currentTrack);
-                        setTimeout(checkMarquee, 100);
-                    }
+                    trackName.text(currentTrack);
+                    trackName.data('original-text', currentTrack);
+                    setTimeout(checkMarquee, 100);
 
                     // Auto-connect to stream
                     playStream();
