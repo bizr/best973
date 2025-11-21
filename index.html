@@ -1082,12 +1082,27 @@
 
             // Fetch album art from iTunes
             function fetchAlbumArt(artist, title, callback) {
-                var searchTerm = encodeURIComponent((artist ? artist + ' ' : '') + title);
+                // Clean up search term - remove common radio junk
+                var cleanTitle = title.replace(/\b(live|LIVE|Live|radio|RADIO|Radio|feat\.|ft\.|featuring)\b/gi, '').trim();
+                var cleanArtist = artist ? artist.replace(/\b(live|LIVE|Live|radio|RADIO|Radio)\b/gi, '').trim() : '';
+
+                // Don't search if title is too short or generic
+                if (!cleanTitle || cleanTitle.length < 3 || /^[^a-zA-Z0-9]+$/.test(cleanTitle)) {
+                    callback(null);
+                    return;
+                }
+
+                var searchTerm = encodeURIComponent((cleanArtist ? cleanArtist + ' ' : '') + cleanTitle);
                 $.ajax({
-                    url: 'https://itunes.apple.com/search?term=' + searchTerm + '&entity=song&limit=1',
+                    url: 'https://itunes.apple.com/search',
                     method: 'GET',
-                    dataType: 'json',
+                    dataType: 'jsonp',
                     timeout: 5000,
+                    data: {
+                        term: searchTerm,
+                        entity: 'song',
+                        limit: 1
+                    },
                     success: function(data) {
                         if (data.results && data.results.length > 0) {
                             // Get high-res artwork (replace 100x100 with 600x600)
