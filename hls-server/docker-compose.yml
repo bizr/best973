@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  hls:
+    build: .
+    container_name: best973-hls
+    restart: unless-stopped
+    ports:
+      - "39573:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
