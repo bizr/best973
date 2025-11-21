@@ -1016,9 +1016,8 @@
             var historyList = $('#history-list');
             var heartbeatInterval = null;
 
-            // Stream URLs
-            var streamUrl = 'https://stream.best973.gr/stream/1/';
-            var hlsStreamUrl = 'http://dock.mnet.gr:39573/hls/stream.m3u8'; // For AirPlay only
+            // Stream URL
+            var streamUrl = 'https://hls.best973.gr/hls/stream.m3u8';
 
             // Format timestamp to time
             function formatTime(timestamp) {
@@ -1234,7 +1233,7 @@
                 jogPlatter.addClass('active');
                 cdjPlayer.addClass('active');
                 // Reload source for live stream to get fresh connection
-                audio.src = streamUrl + '?t=' + Date.now();
+                audio.src = streamUrl;
                 audio.load();
                 var playPromise = audio.play();
                 if (playPromise !== undefined) {
