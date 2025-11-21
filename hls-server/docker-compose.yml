@@ -7,6 +7,9 @@ services:
     restart: unless-stopped
     ports:
       - "39573:8080"
+    environment:
+      - VIRTUAL_HOST=hls.best973.gr
+      - LETSENCRYPT_HOST=hls.best973.gr
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
       interval: 30s
