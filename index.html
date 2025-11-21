@@ -693,19 +693,27 @@
 
             body {
                 padding-top: calc(30px + env(safe-area-inset-top, 0px));
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
             }
 
             .now-playing {
-                width: 92%;
+                width: 85%;
+                max-width: calc(100vw - 40px);
             }
 
             .now-playing-inner {
-                padding: 20px 20px;
+                padding: 18px 16px;
                 border-radius: 12px;
             }
 
+            .now-playing-label {
+                font-size: 10px;
+                letter-spacing: 2px;
+            }
+
             #track-name {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             .jog-platter {
@@ -734,28 +742,56 @@
             }
 
             .now-playing {
-                width: 88%;
+                width: 82%;
+                max-width: calc(100vw - 50px);
             }
 
             .now-playing-inner {
-                padding: 16px 14px;
+                padding: 14px 12px;
                 border-radius: 10px;
+                box-shadow: 0 15px 40px rgba(234, 18, 143, 0.3);
             }
 
             .now-playing-label {
                 font-size: 9px;
-                letter-spacing: 2px;
-                margin-bottom: 10px;
+                letter-spacing: 1.5px;
+                margin-bottom: 8px;
             }
 
             #track-name {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             .now-playing-inner::after {
                 display: none;
             }
 
+            .now-playing-inner::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .now-playing {
+                width: 80%;
+                max-width: calc(100vw - 40px);
+            }
+
+            .now-playing-inner {
+                padding: 12px 10px;
+            }
+
+            .now-playing-label {
+                font-size: 8px;
+                letter-spacing: 1px;
+            }
+
+            #track-name {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
             .jog-platter {
                 width: 240px;
                 height: 240px;
@@ -1088,6 +1124,16 @@
                 audio = new Audio();
                 audio.preload = 'none';
                 audio.loop = false;
+                audio.setAttribute('playsinline', '');
+                audio.setAttribute('webkit-playsinline', '');
+
+                // Keep audio session alive
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible' && jogPlatter.hasClass('active') && audio.paused) {
+                        // App came back to foreground, stream was interrupted - auto reconnect
+                        playStream();
+                    }
+                });
 
                 // Event listeners - click anywhere on the disc
                 jogPlatter.on('click', playPause);
