@@ -194,6 +194,7 @@
             width: 100%;
             overflow: hidden;
             z-index: 2;
+            text-align: center;
         }
 
         #track-name {
@@ -215,8 +216,7 @@
         }
 
         .track-name-wrapper.marquee {
-            display: flex;
-            justify-content: flex-start;
+            text-align: left;
         }
 
         #track-name.marquee {
@@ -511,26 +511,54 @@
 
         /* Footer */
         footer {
-            position: relative;
-            z-index: 10;
-            margin-top: 40px;
-            text-align: center;
-            color: #fff;
+            display: none;
         }
 
-        .social-links {
-            margin-top: 20px;
+        /* Floating Facebook Button */
+        .social-float {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
         }
 
-        .social-links a {
+        .social-float a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #1877f2 0%, #0d5bbf 100%);
             color: #fff;
-            font-size: 20px;
-            margin: 0 10px;
+            font-size: 22px;
+            text-decoration: none;
+            border-radius: 8px 0 0 8px;
+            box-shadow:
+                -3px 0 15px rgba(24, 119, 242, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
             transition: 0.3s ease;
         }
 
-        .social-links a:hover {
-            color: #ea128f;
+        .social-float a:hover {
+            width: 52px;
+            background: linear-gradient(135deg, #1a8cff 0%, #1877f2 100%);
+            box-shadow:
+                -5px 0 25px rgba(24, 119, 242, 0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .social-float a {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                border-radius: 6px 0 0 6px;
+            }
+
+            .social-float a:hover {
+                width: 42px;
+            }
         }
 
         /* Mobile responsive */
@@ -723,13 +751,12 @@
         </div>
     </div>
 
-    <footer>
-        <div class="social-links">
-            <a href="https://www.facebook.com/best973" target="_blank" title="Follow us on Facebook">
-                <i class="fa fa-facebook"></i>
-            </a>
-        </div>
-    </footer>
+    <!-- Floating Facebook Button -->
+    <div class="social-float">
+        <a href="https://www.facebook.com/best973" target="_blank" title="Follow us on Facebook">
+            <i class="fa fa-facebook"></i>
+        </a>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
