@@ -108,8 +108,10 @@
         .now-playing {
             position: relative;
             perspective: 1000px;
-            width: 95%;
+            width: 90%;
             max-width: 1400px;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .now-playing-inner {
@@ -601,17 +603,16 @@
             }
 
             .now-playing {
-                width: 100%;
-                max-width: none;
+                width: 92%;
             }
 
             .now-playing-inner {
-                padding: 25px 25px;
-                border-radius: 0;
+                padding: 20px 20px;
+                border-radius: 12px;
             }
 
             #track-name {
-                font-size: 24px;
+                font-size: 20px;
             }
 
             .jog-platter {
@@ -640,22 +641,26 @@
             }
 
             .now-playing {
-                width: 100%;
+                width: 88%;
             }
 
             .now-playing-inner {
-                padding: 20px 15px;
-                border-radius: 0;
+                padding: 16px 14px;
+                border-radius: 10px;
             }
 
             .now-playing-label {
-                font-size: 10px;
+                font-size: 9px;
                 letter-spacing: 2px;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
             }
 
             #track-name {
-                font-size: 22px;
+                font-size: 18px;
+            }
+
+            .now-playing-inner::after {
+                display: none;
             }
 
             .jog-platter {
