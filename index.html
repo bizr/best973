@@ -956,16 +956,28 @@
                                     songText = currentSong.artist + ' - ' + songText;
                                 }
 
+                                // Check for garbled/corrupted characters (encoding issues)
+                                function isGarbled(text) {
+                                    if (!text) return true;
+                                    // Check for replacement characters (U+FFFD) or control chars
+                                    if (/\uFFFD/.test(text)) return true;
+                                    // Valid: Latin, Greek (all blocks), Cyrillic, numbers, punctuation, spaces
+                                    // \u0370-\u03FF: Greek and Coptic
+                                    // \u1F00-\u1FFF: Greek Extended
+                                    // \u0300-\u036F: Combining diacritical marks (for accents)
+                                    // \u00C0-\u00FF: Latin Extended (accented chars)
+                                    var validChars = text.replace(/[^a-zA-Z0-9\u00C0-\u00FF\u0300-\u036F\u0370-\u03FF\u1F00-\u1FFF\s\-\.\,\'\"\!\?\&\(\)\/]/g, '');
+                                    return validChars.length < text.length * 0.5;
+                                }
+
                                 // Update display if we got song info
-                                if (songText && songText.trim() !== '') {
+                                if (songText && songText.trim() !== '' && !isGarbled(songText)) {
                                     trackName.text(songText);
                                     trackName.data('original-text', songText);
                                 } else {
-                                    // Fallback: display any text we can find
-                                    var fallbackText = currentSong.title || currentSong.song ||
-                                                      currentSong.metadata || 'BEST 97.3 FM';
-                                    trackName.text(fallbackText);
-                                    trackName.data('original-text', fallbackText);
+                                    // Fallback for garbled text
+                                    trackName.text('Best 97.3');
+                                    trackName.data('original-text', 'Best 97.3');
                                 }
 
                                 // Check if marquee is needed
