@@ -325,9 +325,32 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
+        .now-playing-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #now-playing-art {
+            width: 80px;
+            height: 80px;
+            min-width: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow:
+                0 0 20px rgba(234, 18, 143, 0.5),
+                0 0 40px rgba(109, 179, 242, 0.3),
+                0 4px 15px rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
         .track-name-wrapper {
             position: relative;
-            width: 100%;
+            flex: 1;
+            min-width: 0;
             overflow: hidden;
             z-index: 2;
             text-align: center;
@@ -799,6 +822,20 @@
                 margin-bottom: 8px;
             }
 
+            .now-playing-content {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            #now-playing-art {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1;
+                max-width: 280px;
+                min-width: unset;
+                border-radius: 12px;
+            }
+
             #track-name {
                 font-size: 16px;
             }
@@ -904,8 +941,11 @@
         <div class="now-playing">
             <div class="now-playing-inner">
                 <div class="now-playing-label">NOW PLAYING</div>
-                <div class="track-name-wrapper">
-                    <div id="track-name">PRESS PLAY TO START STREAMING</div>
+                <div class="now-playing-content">
+                    <img id="now-playing-art" src="best-logo-retina.png" alt="Album Art">
+                    <div class="track-name-wrapper">
+                        <div id="track-name">PRESS PLAY TO START STREAMING</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1107,10 +1147,15 @@
 
                                     // Fetch album art from iTunes
                                     var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
+                                    var nowPlayingArt = $('#now-playing-art');
+                                    // Reset to logo first
+                                    nowPlayingArt.attr('src', 'best-logo-retina.png');
+
                                     if (songTitle && !isGarbled(songTitle)) {
                                         fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
                                             if (albumArt) {
                                                 updateMediaSession(albumArt);
+                                                nowPlayingArt.attr('src', albumArt);
                                             }
                                         });
                                     }
@@ -1228,6 +1273,10 @@
                 audio.loop = false;
                 audio.setAttribute('playsinline', '');
                 audio.setAttribute('webkit-playsinline', '');
+                audio.setAttribute('x-webkit-airplay', 'allow');
+                // Append to DOM for AirPlay visibility
+                audio.style.display = 'none';
+                document.body.appendChild(audio);
 
                 // Keep audio session alive
                 document.addEventListener('visibilitychange', function() {
