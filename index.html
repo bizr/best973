@@ -51,6 +51,10 @@
             box-sizing: border-box;
         }
 
+        #radio-audio {
+            display: none;
+        }
+
         /* Loading Screen */
         .loading-screen {
             position: fixed;
@@ -825,6 +829,7 @@
             .now-playing-content {
                 flex-direction: column;
                 gap: 12px;
+                padding: 0 10px;
             }
 
             #now-playing-art {
@@ -836,8 +841,18 @@
                 border-radius: 12px;
             }
 
+            .track-name-wrapper {
+                padding: 0 15px;
+                width: 100%;
+            }
+
             #track-name {
                 font-size: 16px;
+                white-space: nowrap;
+            }
+
+            #track-name.marquee {
+                animation: textGlow 2s ease-in-out infinite, marqueeBounce 8s ease-in-out 1s infinite alternate;
             }
 
             .now-playing-inner::after {
@@ -934,6 +949,9 @@
     <nav class="top-nav">
         <img src="best-logo-retina.png" alt="Best 97.3 Logo" class="nav-logo">
     </nav>
+
+    <!-- Hidden Audio Element for AirPlay -->
+    <audio id="radio-audio" x-webkit-airplay="allow" airplay="allow" preload="none" playsinline webkit-playsinline></audio>
 
     <!-- Radio Player -->
     <div id="cdj-player">
@@ -1268,15 +1286,7 @@
 
             // Initialize player
             function initPlayer() {
-                audio = new Audio();
-                audio.preload = 'none';
-                audio.loop = false;
-                audio.setAttribute('playsinline', '');
-                audio.setAttribute('webkit-playsinline', '');
-                audio.setAttribute('x-webkit-airplay', 'allow');
-                // Append to DOM for AirPlay visibility
-                audio.style.display = 'none';
-                document.body.appendChild(audio);
+                audio = document.getElementById('radio-audio');
 
                 // Keep audio session alive
                 document.addEventListener('visibilitychange', function() {
