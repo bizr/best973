@@ -1020,6 +1020,29 @@
                 }
             }
 
+            // Fetch album art from iTunes
+            function fetchAlbumArt(artist, title, callback) {
+                var searchTerm = encodeURIComponent((artist ? artist + ' ' : '') + title);
+                $.ajax({
+                    url: 'https://itunes.apple.com/search?term=' + searchTerm + '&entity=song&limit=1',
+                    method: 'GET',
+                    dataType: 'json',
+                    timeout: 5000,
+                    success: function(data) {
+                        if (data.results && data.results.length > 0) {
+                            // Get high-res artwork (replace 100x100 with 600x600)
+                            var artworkUrl = data.results[0].artworkUrl100.replace('100x100', '600x600');
+                            callback(artworkUrl);
+                        } else {
+                            callback(null);
+                        }
+                    },
+                    error: function() {
+                        callback(null);
+                    }
+                });
+            }
+
             // Fetch current song info
             function fetchSongInfo() {
                 $.ajax({
@@ -1066,14 +1089,31 @@
 
                                 // Update Media Session for lock screen / control center
                                 if ('mediaSession' in navigator) {
-                                    navigator.mediaSession.metadata = new MediaMetadata({
-                                        title: displayText,
-                                        artist: 'Best 97.3 FM',
-                                        album: 'Live Radio - Kalamata',
-                                        artwork: [
-                                            { src: 'best-logo-retina.png', sizes: '512x512', type: 'image/png' }
-                                        ]
-                                    });
+                                    // Set initial metadata with logo
+                                    var artworkSrc = 'best-logo-retina.png';
+                                    var updateMediaSession = function(artwork) {
+                                        navigator.mediaSession.metadata = new MediaMetadata({
+                                            title: displayText,
+                                            artist: currentSong.artist || 'Best 97.3 FM',
+                                            album: 'Best 97.3 FM - Kalamata',
+                                            artwork: [
+                                                { src: artwork, sizes: '512x512', type: 'image/png' }
+                                            ]
+                                        });
+                                    };
+
+                                    // Set immediately with logo, then try to fetch album art
+                                    updateMediaSession(artworkSrc);
+
+                                    // Fetch album art from iTunes
+                                    var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
+                                    if (songTitle && !isGarbled(songTitle)) {
+                                        fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
+                                            if (albumArt) {
+                                                updateMediaSession(albumArt);
+                                            }
+                                        });
+                                    }
                                 }
 
                                 // Check if marquee is needed
