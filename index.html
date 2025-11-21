@@ -1241,22 +1241,15 @@
             $(document).ready(function() {
                 initPlayer();
 
-                // Check if music was recently playing (within last 5 minutes - accounts for iOS suspending JS)
-                var lastPlaying = parseInt(localStorage.getItem('best973_playing') || '0');
-                var currentTrack = localStorage.getItem('best973_track');
-                var wasRecentlyPlaying = (Date.now() - lastPlaying) < 300000;
+                // Check if opened from PWA (installed app)
+                var isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                            window.navigator.standalone === true;
 
-                if (wasRecentlyPlaying && currentTrack) {
-                    // Sync UI to show music is playing
-                    jogPlatter.addClass('active');
-                    cdjPlayer.addClass('active');
-
-                    trackName.text(currentTrack);
-                    trackName.data('original-text', currentTrack);
-                    setTimeout(checkMarquee, 100);
-
-                    // Auto-connect to stream
-                    playStream();
+                if (isPWA) {
+                    // PWA mode - auto-play since user explicitly opened the radio app
+                    setTimeout(function() {
+                        playStream();
+                    }, 500);
                 }
 
                 // Check marquee on window resize
