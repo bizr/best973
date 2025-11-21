@@ -885,6 +885,16 @@
                 return hours + ':' + minutes;
             }
 
+            // Check for garbled/corrupted characters (encoding issues)
+            function isGarbled(text) {
+                if (!text) return true;
+                // Check for replacement characters (U+FFFD) or control chars
+                if (/\uFFFD/.test(text)) return true;
+                // Valid: Latin, Greek (all blocks), numbers, punctuation, spaces
+                var validChars = text.replace(/[^a-zA-Z0-9\u00C0-\u00FF\u0300-\u036F\u0370-\u03FF\u1F00-\u1FFF\s\-\.\,\'\"\!\?\&\(\)\/]/g, '');
+                return validChars.length < text.length * 0.5;
+            }
+
             // Enable marquee if text overflows
             function checkMarquee() {
                 var wrapper = $('.track-name-wrapper');
@@ -956,20 +966,6 @@
                                     songText = currentSong.artist + ' - ' + songText;
                                 }
 
-                                // Check for garbled/corrupted characters (encoding issues)
-                                function isGarbled(text) {
-                                    if (!text) return true;
-                                    // Check for replacement characters (U+FFFD) or control chars
-                                    if (/\uFFFD/.test(text)) return true;
-                                    // Valid: Latin, Greek (all blocks), Cyrillic, numbers, punctuation, spaces
-                                    // \u0370-\u03FF: Greek and Coptic
-                                    // \u1F00-\u1FFF: Greek Extended
-                                    // \u0300-\u036F: Combining diacritical marks (for accents)
-                                    // \u00C0-\u00FF: Latin Extended (accented chars)
-                                    var validChars = text.replace(/[^a-zA-Z0-9\u00C0-\u00FF\u0300-\u036F\u0370-\u03FF\u1F00-\u1FFF\s\-\.\,\'\"\!\?\&\(\)\/]/g, '');
-                                    return validChars.length < text.length * 0.5;
-                                }
-
                                 // Update display if we got song info
                                 if (songText && songText.trim() !== '' && !isGarbled(songText)) {
                                     trackName.text(songText);
@@ -996,6 +992,10 @@
                                     var track = data[i];
                                     if (track) {
                                         var trackTitle = track.title || track.song || track.track || 'Unknown';
+                                        // Check for garbled text in history
+                                        if (isGarbled(trackTitle)) {
+                                            trackTitle = 'Best 97.3';
+                                        }
                                         var trackTime = formatTime(track.playedat || 0);
 
                                         historyHTML += '<div class="history-item">';
