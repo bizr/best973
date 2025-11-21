@@ -1232,18 +1232,26 @@
 
             // Initialize on page load
             $(document).ready(function() {
-                // Check if this is a duplicate open while music is playing
+                initPlayer();
+
+                // Check if music is playing (from another instance)
                 var isPlaying = localStorage.getItem('best973_playing') === 'true';
                 var currentTrack = localStorage.getItem('best973_track');
 
-                if (isPlaying && currentTrack && currentTrack !== 'Best 97.3') {
-                    // Opened from lock screen while playing - redirect to lyrics search
-                    var searchQuery = encodeURIComponent(currentTrack + ' lyrics');
-                    window.location.href = 'https://www.google.com/search?q=' + searchQuery;
-                    return;
-                }
+                if (isPlaying) {
+                    // Sync UI to show music is playing
+                    jogPlatter.addClass('active');
+                    cdjPlayer.addClass('active');
 
-                initPlayer();
+                    if (currentTrack) {
+                        trackName.text(currentTrack);
+                        trackName.data('original-text', currentTrack);
+                        setTimeout(checkMarquee, 100);
+                    }
+
+                    // Auto-connect to stream
+                    playStream();
+                }
 
                 // Check marquee on window resize
                 $(window).on('resize', function() {
