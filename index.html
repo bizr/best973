@@ -1038,21 +1038,47 @@
                 });
             }
 
+            // Play stream (reload source for live stream)
+            function playStream() {
+                jogPlatter.addClass('active');
+                cdjPlayer.addClass('active');
+                // Reload source for live stream to get fresh connection
+                audio.src = streamUrl + '?t=' + Date.now(); // Cache bust for fresh stream
+                audio.load();
+                var playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function() {
+                        // Update media session state
+                        if ('mediaSession' in navigator) {
+                            navigator.mediaSession.playbackState = 'playing';
+                        }
+                    }).catch(function(e) {
+                        console.log('Play failed:', e);
+                        jogPlatter.removeClass('active');
+                        cdjPlayer.removeClass('active');
+                    });
+                }
+                fetchSongInfo();
+            }
+
+            // Stop stream (keep src for media session)
+            function stopStream() {
+                jogPlatter.removeClass('active');
+                cdjPlayer.removeClass('active');
+                audio.pause();
+                // Update media session state
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'paused';
+                }
+            }
+
             // Play/Pause functionality
             function playPause() {
                 setTimeout(function() {
-                    if (audio.paused) {
-                        // Activate everything
-                        jogPlatter.addClass('active');
-                        cdjPlayer.addClass('active');
-                        audio.play();
-                        // Fetch song info immediately when starting to play
-                        fetchSongInfo();
+                    if (!jogPlatter.hasClass('active')) {
+                        playStream();
                     } else {
-                        // Deactivate everything
-                        jogPlatter.removeClass('active');
-                        cdjPlayer.removeClass('active');
-                        audio.pause();
+                        stopStream();
                     }
                 }, 150);
             }
@@ -1060,34 +1086,43 @@
             // Initialize player
             function initPlayer() {
                 audio = new Audio();
-                audio.src = streamUrl;
                 audio.preload = 'none';
                 audio.loop = false;
 
                 // Event listeners - click anywhere on the disc
                 jogPlatter.on('click', playPause);
 
-                // Media Session API for lock screen controls
+                // Set initial media session metadata
                 if ('mediaSession' in navigator) {
-                    navigator.mediaSession.setActionHandler('play', function() {
-                        if (audio.paused) {
-                            jogPlatter.addClass('active');
-                            cdjPlayer.addClass('active');
-                            audio.play();
-                            fetchSongInfo();
-                        }
-                    });
-                    navigator.mediaSession.setActionHandler('pause', function() {
-                        jogPlatter.removeClass('active');
-                        cdjPlayer.removeClass('active');
-                        audio.pause();
-                    });
-                    navigator.mediaSession.setActionHandler('stop', function() {
-                        jogPlatter.removeClass('active');
-                        cdjPlayer.removeClass('active');
-                        audio.pause();
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: 'Best 97.3 FM',
+                        artist: 'Live Radio',
+                        album: 'Kalamata',
+                        artwork: [
+                            { src: 'best-logo-retina.png', sizes: '512x512', type: 'image/png' }
+                        ]
                     });
                 }
+
+                // Media Session API for lock screen controls
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.setActionHandler('play', playStream);
+                    navigator.mediaSession.setActionHandler('pause', stopStream);
+                    navigator.mediaSession.setActionHandler('stop', stopStream);
+                }
+
+                // Handle audio interruptions (phone calls, etc.)
+                audio.addEventListener('pause', function() {
+                    // Audio was paused externally (phone call, etc.)
+                    jogPlatter.removeClass('active');
+                    cdjPlayer.removeClass('active');
+                });
+
+                audio.addEventListener('error', function() {
+                    // Stream error - reset UI
+                    jogPlatter.removeClass('active');
+                    cdjPlayer.removeClass('active');
+                });
 
                 // Fetch song info every 30 seconds
                 fetchSongInfo();
