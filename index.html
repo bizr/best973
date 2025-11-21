@@ -967,13 +967,26 @@
                                 }
 
                                 // Update display if we got song info
+                                var displayText;
                                 if (songText && songText.trim() !== '' && !isGarbled(songText)) {
-                                    trackName.text(songText);
-                                    trackName.data('original-text', songText);
+                                    displayText = songText;
                                 } else {
                                     // Fallback for garbled text
-                                    trackName.text('Best 97.3');
-                                    trackName.data('original-text', 'Best 97.3');
+                                    displayText = 'Best 97.3';
+                                }
+                                trackName.text(displayText);
+                                trackName.data('original-text', displayText);
+
+                                // Update Media Session for lock screen / control center
+                                if ('mediaSession' in navigator) {
+                                    navigator.mediaSession.metadata = new MediaMetadata({
+                                        title: displayText,
+                                        artist: 'Best 97.3 FM',
+                                        album: 'Live Radio - Kalamata',
+                                        artwork: [
+                                            { src: 'best-logo-retina.png', sizes: '512x512', type: 'image/png' }
+                                        ]
+                                    });
                                 }
 
                                 // Check if marquee is needed
@@ -1053,6 +1066,28 @@
 
                 // Event listeners - click anywhere on the disc
                 jogPlatter.on('click', playPause);
+
+                // Media Session API for lock screen controls
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.setActionHandler('play', function() {
+                        if (audio.paused) {
+                            jogPlatter.addClass('active');
+                            cdjPlayer.addClass('active');
+                            audio.play();
+                            fetchSongInfo();
+                        }
+                    });
+                    navigator.mediaSession.setActionHandler('pause', function() {
+                        jogPlatter.removeClass('active');
+                        cdjPlayer.removeClass('active');
+                        audio.pause();
+                    });
+                    navigator.mediaSession.setActionHandler('stop', function() {
+                        jogPlatter.removeClass('active');
+                        cdjPlayer.removeClass('active');
+                        audio.pause();
+                    });
+                }
 
                 // Fetch song info every 30 seconds
                 fetchSongInfo();
