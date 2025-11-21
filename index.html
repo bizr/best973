@@ -1017,7 +1017,7 @@
             var heartbeatInterval = null;
 
             // Stream URL
-            var streamUrl = 'https://stream.best973.gr/stream/1/';
+            var streamUrl = 'https://best973.gr/stream.m3u8';
 
             // Format timestamp to time
             function formatTime(timestamp) {
@@ -1233,7 +1233,7 @@
                 jogPlatter.addClass('active');
                 cdjPlayer.addClass('active');
                 // Reload source for live stream to get fresh connection
-                audio.src = streamUrl + '?t=' + Date.now(); // Cache bust for fresh stream
+                audio.src = streamUrl;
                 audio.load();
                 var playPromise = audio.play();
                 if (playPromise !== undefined) {
