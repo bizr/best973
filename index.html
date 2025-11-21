@@ -875,10 +875,10 @@
                                 trackName.data('original-text', 'BEST 97.3 FM - KALAMATA');
                             }
 
-                            // Update track history (previous 5 songs) - moved outside current song check
+                            // Update track history (previous songs) - moved outside current song check
                             if (data && data.length > 1) {
                                 var historyHTML = '';
-                                var historyCount = Math.min(5, data.length - 1);
+                                var historyCount = data.length - 1;
 
                                 for (var i = 1; i <= historyCount; i++) {
                                     var track = data[i];
