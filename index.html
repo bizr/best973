@@ -1190,7 +1190,11 @@
                                     // Fetch album art from iTunes
                                     var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
                                     var nowPlayingArt = $('#now-playing-art');
+                                    var discArt = $('#_1');
+
+                                    // Reset both to logo first
                                     nowPlayingArt.attr('src', 'best-logo-retina.png');
+                                    discArt.attr('src', 'best-logo-retina.png');
 
                                     if (songTitle && !isGarbled(songTitle)) {
                                         fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
@@ -1200,6 +1204,7 @@
                                                 img.onload = function() {
                                                     updateMediaSession(albumArt);
                                                     nowPlayingArt.attr('src', albumArt);
+                                                    discArt.attr('src', albumArt);
                                                 };
                                                 img.src = albumArt;
                                             }
