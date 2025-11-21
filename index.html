@@ -1005,11 +1005,13 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         (function() {
             'use strict';
 
             var audio = null;
+            var hls = null;
             var jogPlatter = $('#album-art');
             var trackName = $('#track-name');
             var cdjPlayer = $('#cdj-player');
@@ -1243,9 +1245,42 @@
             function playStream() {
                 jogPlatter.addClass('active');
                 cdjPlayer.addClass('active');
-                // Reload source for live stream to get fresh connection
-                audio.src = streamUrl;
-                audio.load();
+
+                // Check if browser supports HLS natively (Safari)
+                if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Native HLS support (Safari)
+                    audio.src = streamUrl;
+                    audio.load();
+                } else if (Hls.isSupported()) {
+                    // Use hls.js for other browsers
+                    if (hls) {
+                        hls.destroy();
+                    }
+                    hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    });
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(audio);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        audio.play();
+                    });
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.error('HLS error:', data);
+                        if (data.fatal) {
+                            jogPlatter.removeClass('active');
+                            cdjPlayer.removeClass('active');
+                            localStorage.setItem('best973_playing', 'false');
+                        }
+                    });
+                } else {
+                    console.error('HLS not supported');
+                    jogPlatter.removeClass('active');
+                    cdjPlayer.removeClass('active');
+                    return;
+                }
+
                 var playPromise = audio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(function() {
@@ -1275,6 +1310,11 @@
                 jogPlatter.removeClass('active');
                 cdjPlayer.removeClass('active');
                 audio.pause();
+                // Destroy hls instance if exists
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
                 // Update media session state
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.playbackState = 'paused';
