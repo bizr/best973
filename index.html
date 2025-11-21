@@ -1147,33 +1147,44 @@
 
                                 // Update Media Session for lock screen / control center
                                 if ('mediaSession' in navigator) {
-                                    // Set initial metadata with logo
-                                    var artworkSrc = 'best-logo-retina.png';
-                                    var updateMediaSession = function(artwork) {
+                                    var updateMediaSession = function(artworkUrl) {
+                                        // Provide multiple sizes for better compatibility
+                                        var artworkArray = [
+                                            { src: artworkUrl, sizes: '96x96', type: 'image/png' },
+                                            { src: artworkUrl, sizes: '128x128', type: 'image/png' },
+                                            { src: artworkUrl, sizes: '192x192', type: 'image/png' },
+                                            { src: artworkUrl, sizes: '256x256', type: 'image/png' },
+                                            { src: artworkUrl, sizes: '384x384', type: 'image/png' },
+                                            { src: artworkUrl, sizes: '512x512', type: 'image/png' }
+                                        ];
+
                                         navigator.mediaSession.metadata = new MediaMetadata({
                                             title: displayText,
                                             artist: currentSong.artist || 'Best 97.3 FM',
                                             album: 'Best 97.3 FM - Kalamata',
-                                            artwork: [
-                                                { src: artwork, sizes: '512x512', type: 'image/png' }
-                                            ]
+                                            artwork: artworkArray
                                         });
                                     };
 
-                                    // Set immediately with logo, then try to fetch album art
-                                    updateMediaSession(artworkSrc);
+                                    // Set immediately with logo
+                                    var logoUrl = window.location.origin + '/best-logo-retina.png';
+                                    updateMediaSession(logoUrl);
 
                                     // Fetch album art from iTunes
                                     var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
                                     var nowPlayingArt = $('#now-playing-art');
-                                    // Reset to logo first
                                     nowPlayingArt.attr('src', 'best-logo-retina.png');
 
                                     if (songTitle && !isGarbled(songTitle)) {
                                         fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
                                             if (albumArt) {
-                                                updateMediaSession(albumArt);
-                                                nowPlayingArt.attr('src', albumArt);
+                                                // Preload image to ensure it's cached
+                                                var img = new Image();
+                                                img.onload = function() {
+                                                    updateMediaSession(albumArt);
+                                                    nowPlayingArt.attr('src', albumArt);
+                                                };
+                                                img.src = albumArt;
                                             }
                                         });
                                     }
