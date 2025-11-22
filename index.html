@@ -473,6 +473,7 @@
             left: 0;
             width: 100%;
             height: 100%;
+            object-fit: cover;
             opacity: 0.7;
             z-index: 1;
         }
@@ -494,9 +495,9 @@
             width: 85px;
             height: 85px;
             background:
-                radial-gradient(circle at 35% 35%, rgba(58, 58, 58, 0.6) 0%, rgba(42, 42, 42, 0.7) 40%, rgba(26, 26, 26, 0.8) 80%);
+                radial-gradient(circle at 35% 35%, #3a3a3a 0%, #2a2a2a 40%, #1a1a1a 80%);
             border-radius: 50%;
-            border: 4px solid rgba(34, 34, 34, 0.8);
+            border: 4px solid #222;
             box-shadow:
                 inset 0 3px 8px rgba(0,0,0,0.8),
                 inset 0 -2px 4px rgba(255,255,255,0.05),
@@ -505,8 +506,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
         }
 
         .jog-center::before {
@@ -1094,27 +1093,39 @@
                     return;
                 }
 
-                var searchTerm = encodeURIComponent((cleanArtist ? cleanArtist + ' ' : '') + cleanTitle);
-                $.ajax({
-                    url: 'https://itunes.apple.com/search',
-                    method: 'GET',
-                    dataType: 'jsonp',
-                    timeout: 5000,
-                    data: {
-                        term: searchTerm,
-                        entity: 'song',
-                        limit: 1
-                    },
-                    success: function(data) {
-                        if (data.results && data.results.length > 0) {
-                            // Get high-res artwork (replace 100x100 with 600x600)
-                            var artworkUrl = data.results[0].artworkUrl100.replace('100x100', '600x600');
-                            callback(artworkUrl);
-                        } else {
+                // Helper function to perform iTunes search
+                var doSearch = function(searchTerm, onSuccess, onFail) {
+                    $.ajax({
+                        url: 'https://itunes.apple.com/search',
+                        method: 'GET',
+                        dataType: 'jsonp',
+                        timeout: 5000,
+                        data: {
+                            term: searchTerm,
+                            entity: 'song',
+                            limit: 1
+                        },
+                        success: function(data) {
+                            if (data.results && data.results.length > 0) {
+                                var artworkUrl = data.results[0].artworkUrl100.replace('100x100', '600x600');
+                                onSuccess(artworkUrl);
+                            } else {
+                                onFail();
+                            }
+                        },
+                        error: onFail
+                    });
+                };
+
+                // First try with artist + title
+                var fullSearchTerm = (cleanArtist ? cleanArtist + ' ' : '') + cleanTitle;
+                doSearch(fullSearchTerm, callback, function() {
+                    // If no results with artist, try title only (handles garbled artist names)
+                    if (cleanArtist) {
+                        doSearch(cleanTitle, callback, function() {
                             callback(null);
-                        }
-                    },
-                    error: function() {
+                        });
+                    } else {
                         callback(null);
                     }
                 });
@@ -1164,10 +1175,16 @@
                                 // Save track for lyrics redirect
                                 localStorage.setItem('best973_track', displayText);
 
-                                // Update Media Session for lock screen / control center
-                                if ('mediaSession' in navigator) {
-                                    var updateMediaSession = function(artworkUrl) {
-                                        // Provide multiple sizes for better compatibility
+                                // Fetch album art from iTunes (for now-playing display only)
+                                var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
+                                var nowPlayingArt = $('#now-playing-art');
+
+                                // Reset to logo first
+                                nowPlayingArt.attr('src', 'best-logo-retina.png');
+
+                                // Helper function to update Media Session if supported
+                                var updateMediaSession = function(artworkUrl) {
+                                    if ('mediaSession' in navigator) {
                                         var artworkArray = [
                                             { src: artworkUrl, sizes: '96x96', type: 'image/png' },
                                             { src: artworkUrl, sizes: '128x128', type: 'image/png' },
@@ -1183,35 +1200,26 @@
                                             album: 'Best 97.3 FM - Kalamata',
                                             artwork: artworkArray
                                         });
-                                    };
-
-                                    // Set immediately with logo
-                                    var logoUrl = window.location.origin + '/best-logo-retina.png';
-                                    updateMediaSession(logoUrl);
-
-                                    // Fetch album art from iTunes
-                                    var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
-                                    var nowPlayingArt = $('#now-playing-art');
-                                    var discArt = $('#_1');
-
-                                    // Reset both to logo first
-                                    nowPlayingArt.attr('src', 'best-logo-retina.png');
-                                    discArt.attr('src', 'best-logo-retina.png');
-
-                                    if (songTitle && !isGarbled(songTitle)) {
-                                        fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
-                                            if (albumArt) {
-                                                // Preload image to ensure it's cached
-                                                var img = new Image();
-                                                img.onload = function() {
-                                                    updateMediaSession(albumArt);
-                                                    nowPlayingArt.attr('src', albumArt);
-                                                    discArt.attr('src', albumArt);
-                                                };
-                                                img.src = albumArt;
-                                            }
-                                        });
                                     }
+                                };
+
+                                // Set media session immediately with logo
+                                var logoUrl = window.location.origin + '/best-logo-retina.png';
+                                updateMediaSession(logoUrl);
+
+                                // Fetch and display album art (only in now-playing section, not on disc)
+                                if (songTitle && !isGarbled(songTitle)) {
+                                    fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
+                                        if (albumArt) {
+                                            // Preload image to ensure it's cached
+                                            var img = new Image();
+                                            img.onload = function() {
+                                                updateMediaSession(albumArt);
+                                                nowPlayingArt.attr('src', albumArt);
+                                            };
+                                            img.src = albumArt;
+                                        }
+                                    });
                                 }
 
                                 // Check if marquee is needed
