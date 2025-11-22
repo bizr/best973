@@ -1018,6 +1018,7 @@
             var cdjPlayer = $('#cdj-player');
             var historyList = $('#history-list');
             var heartbeatInterval = null;
+            var lastDisplayedTrack = null;
 
             // Stream URL
             var streamUrl = 'https://hls.best973.gr/hls/stream.m3u8';
@@ -1175,51 +1176,55 @@
                                 // Save track for lyrics redirect
                                 localStorage.setItem('best973_track', displayText);
 
-                                // Fetch album art from iTunes (for now-playing display only)
-                                var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
-                                var nowPlayingArt = $('#now-playing-art');
+                                // Only fetch new album art when track changes
+                                if (displayText !== lastDisplayedTrack) {
+                                    lastDisplayedTrack = displayText;
 
-                                // Reset to logo first
-                                nowPlayingArt.attr('src', 'best-logo-retina.png');
+                                    var songTitle = currentSong.title || currentSong.song || currentSong.track || '';
+                                    var nowPlayingArt = $('#now-playing-art');
 
-                                // Helper function to update Media Session if supported
-                                var updateMediaSession = function(artworkUrl) {
-                                    if ('mediaSession' in navigator) {
-                                        var artworkArray = [
-                                            { src: artworkUrl, sizes: '96x96', type: 'image/png' },
-                                            { src: artworkUrl, sizes: '128x128', type: 'image/png' },
-                                            { src: artworkUrl, sizes: '192x192', type: 'image/png' },
-                                            { src: artworkUrl, sizes: '256x256', type: 'image/png' },
-                                            { src: artworkUrl, sizes: '384x384', type: 'image/png' },
-                                            { src: artworkUrl, sizes: '512x512', type: 'image/png' }
-                                        ];
+                                    // Reset to logo first
+                                    nowPlayingArt.attr('src', 'best-logo-retina.png');
 
-                                        navigator.mediaSession.metadata = new MediaMetadata({
-                                            title: displayText,
-                                            artist: currentSong.artist || 'Best 97.3 FM',
-                                            album: 'Best 97.3 FM - Kalamata',
-                                            artwork: artworkArray
+                                    // Helper function to update Media Session if supported
+                                    var updateMediaSession = function(artworkUrl) {
+                                        if ('mediaSession' in navigator) {
+                                            var artworkArray = [
+                                                { src: artworkUrl, sizes: '96x96', type: 'image/png' },
+                                                { src: artworkUrl, sizes: '128x128', type: 'image/png' },
+                                                { src: artworkUrl, sizes: '192x192', type: 'image/png' },
+                                                { src: artworkUrl, sizes: '256x256', type: 'image/png' },
+                                                { src: artworkUrl, sizes: '384x384', type: 'image/png' },
+                                                { src: artworkUrl, sizes: '512x512', type: 'image/png' }
+                                            ];
+
+                                            navigator.mediaSession.metadata = new MediaMetadata({
+                                                title: displayText,
+                                                artist: currentSong.artist || 'Best 97.3 FM',
+                                                album: 'Best 97.3 FM - Kalamata',
+                                                artwork: artworkArray
+                                            });
+                                        }
+                                    };
+
+                                    // Set media session immediately with logo
+                                    var logoUrl = window.location.origin + '/best-logo-retina.png';
+                                    updateMediaSession(logoUrl);
+
+                                    // Fetch and display album art (only in now-playing section, not on disc)
+                                    if (songTitle && !isGarbled(songTitle)) {
+                                        fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
+                                            if (albumArt) {
+                                                // Preload image to ensure it's cached
+                                                var img = new Image();
+                                                img.onload = function() {
+                                                    updateMediaSession(albumArt);
+                                                    nowPlayingArt.attr('src', albumArt);
+                                                };
+                                                img.src = albumArt;
+                                            }
                                         });
                                     }
-                                };
-
-                                // Set media session immediately with logo
-                                var logoUrl = window.location.origin + '/best-logo-retina.png';
-                                updateMediaSession(logoUrl);
-
-                                // Fetch and display album art (only in now-playing section, not on disc)
-                                if (songTitle && !isGarbled(songTitle)) {
-                                    fetchAlbumArt(currentSong.artist, songTitle, function(albumArt) {
-                                        if (albumArt) {
-                                            // Preload image to ensure it's cached
-                                            var img = new Image();
-                                            img.onload = function() {
-                                                updateMediaSession(albumArt);
-                                                nowPlayingArt.attr('src', albumArt);
-                                            };
-                                            img.src = albumArt;
-                                        }
-                                    });
                                 }
 
                                 // Check if marquee is needed
